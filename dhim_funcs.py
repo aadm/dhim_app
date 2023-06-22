@@ -3,7 +3,8 @@
 # last update: 2023-06-22
 #----------------------------------------------------------
 
-
+import numpy as np
+import pandas as pd
 
 def marginal_probability(prior, sens, spec):
     '''

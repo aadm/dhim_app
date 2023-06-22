@@ -10,6 +10,11 @@ import altair as alt
 from dhim_funcs import *
 
 #==========================================================
+# initialize app
+
+st.set_page_config(page_title='DHIm app', layout="wide")
+
+#==========================================================
 # initialize sidebar
 
 grade_options = ['Random', 'Predefined', 'Best', 'Worst']
