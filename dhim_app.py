@@ -13,7 +13,7 @@ from dhim_funcs import *
 # initialize app
 
 st.set_page_config(page_title='DHIm app', layout="wide")
-
+     
 #==========================================================
 # initialize sidebar
 
@@ -23,7 +23,7 @@ pos_options = ['Random', 'Predefined']
 with st.sidebar:
     st.write('_Predefined_ fills in probabilities and grades with default values and allows the user to modify values.')
     sel_grade_opt = st.selectbox('Grades', grade_options, index=1)
-    sel_pos_opt = st.selectbox('POS', pos_options, index=1)
+    # sel_pos_opt = st.selectbox('POS', pos_options, index=1)
 
 if sel_grade_opt == 'Random':
     g_presel = np.random.choice(grade_types, size=24)
@@ -34,10 +34,10 @@ elif sel_grade_opt == 'Best':
 elif sel_grade_opt == 'Worst':
     g_presel = ['A']*24
 
-if sel_pos_opt == 'Random':
-    p_presel = np.random.choice(np.arange(0.3,1.,.1), size=5)
-elif sel_pos_opt == 'Predefined':
-    p_presel = [.9, .9, .7, .4, .5]
+# if sel_pos_opt == 'Random':
+#     p_presel = np.random.choice(np.arange(0.3,1.,.1), size=5)
+# elif sel_pos_opt == 'Predefined':
+#     p_presel = np.array([.9, .9, .7, .4, .5])
 
 #==========================================================
 # initialize widgets
@@ -82,16 +82,13 @@ dhim_names = {
     
 
 # POS widgets
-# p1, p2, p3, p4, p5 = st.columns(5, gap='medium')
-
 pos_widgets = st.columns(5, gap='medium')
-# tmp = np.zeros(len(p_presel))
-tmp = np.full(len(p_presel), np.nan)
-opt0 = dict(min_value=0.0, max_value=1.0, step=0.05, format='%.2f')
+
+tmp = np.full(5, np.nan)
+opt0 = dict(value=1.0, min_value=0.0, max_value=1.0, step=0.05, format='%.2f')
 for i, val in enumerate(pos_widgets):
     with val:
-        tmp[i] = st.number_input(riskelem[i], value=p_presel[i], **opt0)
-
+        tmp[i] = st.number_input(riskelem[i], **opt0)
 pos_input = tmp
 
 st.divider()
@@ -99,8 +96,6 @@ st.divider()
 # DHI Matrix characteristics widgets
 
 grade_widgets = st.columns(3, gap='medium')
-# tmp = ['A']*(len(g_presel))
-# tmp = ['A']*(len(g_presel))
 tmp = np.full(len(g_presel), 'X')
 
 blocks = ['**Background and Data**', '**Full stack and AVO**', '**Other DHIs**']
@@ -108,7 +103,6 @@ rr = [[0,11], [11,19], [19,24]]
 dck = list(dhim_names.keys())
 
 c = 0 
-
 opt1 = dict(options=grade_types, horizontal=True)
 for i, colg in enumerate(grade_widgets):
     with colg:
