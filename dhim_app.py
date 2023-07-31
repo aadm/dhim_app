@@ -1,6 +1,12 @@
 # dhimatrix_app
 #
+# to run locally:
+
 # $ streamlit run dhim_app.py
+#
+# to run webapp:
+#
+# https://dhimtrx.streamlit.app/
 #
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 import numpy as np
