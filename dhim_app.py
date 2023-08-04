@@ -1,6 +1,6 @@
 # dhimatrix_app
 #
-# to run locally:
+# to run locally: 
 
 # $ streamlit run dhim_app.py
 #
@@ -116,7 +116,7 @@ for i, colg in enumerate(grade_widgets):
         st.write(blocks[i])
         for j, val in enumerate(subset):
             id = subset[j]    
-            name = dhim_names[id][0]    
+            name = dhim_names[id][1]    
             tmp[c] = st.radio(name, index=grade_types.index(g_presel[c]), **opt1)
             c += 1
 
