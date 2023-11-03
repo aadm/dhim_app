@@ -15,6 +15,7 @@ import streamlit as st
 import altair as alt
 from dhim_funcs import *
 
+
 #==========================================================
 # initialize app
 
@@ -27,7 +28,12 @@ grade_options = ['Random', 'Predefined', 'Best', 'Worst']
 pos_options = ['Random', 'Predefined']
 
 with st.sidebar:
-    st.write('_Predefined_ fills in probabilities and grades with default values and allows the user to modify values.')
+    st.write('''
+             _Predefined_ fills in probabilities and grades with default values
+             and allows the user to modify values.\n
+             _Best_ = all Ds.\n
+             _Worst_ = all As.
+             ''')
     sel_grade_opt = st.selectbox('Grades', grade_options, index=1)
     # sel_pos_opt = st.selectbox('POS', pos_options, index=1)
 
@@ -36,9 +42,9 @@ if sel_grade_opt == 'Random':
 elif sel_grade_opt == 'Predefined':
     g_presel = ['A','B','C','A','D','B','B','D','C','C','B','D','C','C','B','C','B','B','B','A','A','A','B','B']
 elif sel_grade_opt == 'Best':
-    g_presel = ['D']*24
+    g_presel = get_grades(best=True)
 elif sel_grade_opt == 'Worst':
-    g_presel = ['A']*24
+    g_presel = get_grades(best=False)
 
 # if sel_pos_opt == 'Random':
 #     p_presel = np.random.choice(np.arange(0.3,1.,.1), size=5)
@@ -86,6 +92,8 @@ dhim_names = {
     'DHI_OTHER_5': ['CHIM', 'Gas chimneys'],
 }
     
+pitfall_1_ids = ['DHIP', 'SFACIES', 'SEISQ', 'CLASS', 'AVOM']
+pitfall_2_ids = ['PITFALL', 'SEISD', 'RPM', 'AVOM']
 
 # POS widgets
 pos_widgets = st.columns(5, gap='medium')
@@ -109,14 +117,26 @@ rr = [[0,11], [11,19], [19,24]]
 dck = list(dhim_names.keys())
 
 c = 0 
-opt1 = dict(options=grade_types, horizontal=True)
+
 for i, colg in enumerate(grade_widgets):
     with colg:
         subset = dck[rr[i][0]:rr[i][1]]
         st.write(blocks[i])
         for j, val in enumerate(subset):
-            id = subset[j]    
-            name = dhim_names[id][1]    
+            opt1 = dict(options=grade_types, horizontal=True)
+            id = subset[j]
+            namestr = '{}: {}'
+            if dhim_names[id][0] in pitfall_1_ids:
+                namestr = ':spider:'+namestr
+            if dhim_names[id][0] in pitfall_2_ids:
+                namestr = ':crab:'+namestr
+            name = namestr.format(dhim_names[id][0], dhim_names[id][1])
+            if dhim_names[id][0] == 'PORO':
+                help_poro = dict(help='A: >30%, D: <10%')
+                opt1.update(help_poro)
+            if dhim_names[id][0] == 'FLUID':
+                help_fluid = dict(help='A: gas, D: oil')
+                opt1.update(help_fluid)
             tmp[c] = st.radio(name, index=grade_types.index(g_presel[c]), **opt1)
             c += 1
 
@@ -129,7 +149,7 @@ st.divider()
 
 # update dhi matrix DataFrame with selected grades
 dm = initialize_dhimatrix()
-dm_updated, pdhi_idx, pitf1_idx, pitf2_idx, pitf_idx = update_dhi_matrix(dm, grades)
+dm_updated, pdhi_idx, edhi_idx, pitf1_idx, pitf2_idx, pitf_idx = update_dhi_matrix(dm, grades)
 
 # calculate final POS
 posg, pos, prb = update_pos(pos_input, pdhi_idx, pitf_idx)
@@ -155,8 +175,8 @@ points['pos']  = prb.pos
 points = points.reset_index()
 
 # hard-code upper and lower bounds for this version of the DHI Matrix
-bayes_upper_bound = posterior_probability(prior, 0.804, 0.897)
-bayes_lower_bound = posterior_probability(prior, 0.731, 0.275)
+bayes_upper_bound = posterior_probability(prior, 0.801, 0.902)
+bayes_lower_bound = posterior_probability(prior, 0.235, 0.156)
 
 bounds = pd.DataFrame.from_dict({
     'PRIOR': prior,
@@ -197,10 +217,11 @@ with tab1:
     col1, col2 = st.columns(2, gap='large')
     with col1:
         st.write('### POSg: :red[{:.2f}] // POS: :red[{:.2f}]'.format(posg, pos))
-        st.write('Primary DHI Index: :red[{:.2f}]'.format(pdhi_idx))
-        txt = 'Pitfall Index 1: :red[{:.2f}] // Index 2: :red[{:.2f}]'
+        st.write('Primary DHI Index: :red[{:.3f}]'.format(pdhi_idx))
+        st.write('Extended DHI Index: :red[{:.3f}]'.format(edhi_idx))
+        txt = ':spider: Pitfall Index 1: :red[{:.3f}] // :crab: Index 2: :red[{:.3f}]'
         st.write(txt.format(pitf1_idx, pitf2_idx))
-        st.write('Pitfall Index avg: :red[{:.2f}]'.format(pitf_idx))
+        st.write('Pitfall Index avg: :red[{:.3f}]'.format(pitf_idx))
     with col2:
         st.dataframe(prb, use_container_width=True)
     st.dataframe(dm_updated, use_container_width=True, hide_index=True, height=800)
