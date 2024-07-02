@@ -1,11 +1,10 @@
 #----------------------------------------------------------
 # aadm 2022-2023
-# last update: 2023-11-6
+# last update: 2023-06-22
 #----------------------------------------------------------
 
 import numpy as np
 import pandas as pd
-
 
 def marginal_probability(prior, sens, spec):
     '''
@@ -36,27 +35,6 @@ def spec_to_sens(s, p):
 # define columns
 grade_types = ['A', 'B', 'C', 'D']
 weight_types = ['W1', 'W2', 'W3']
-
-
-def get_grades(best=True):
-    if best: # best case        
-        grades = np.array(['D']*24)
-        grades[:4] = 'A' # doesn't really matter first 4 questions, however we set all to A
-                        #  BUR=A : less than 1000 m burial 
-                        #  POR=A : porosity to 30%
-                        #  FLUID=A : gas
-                        #  AGE=A : pliocene
-    else: # worst case
-        grades = np.array(['A']*24)
-        grades[1] = 'D' # sets porosity to <10%
-        grades[2] = 'D' # sets fluid to oil
-        #.... both above conditions have the same effect, i.e. deactivating the
-        #.... already very low score for PULLD (context flag)
-        grades[4:8] = 'D' # proven dhi play, best seismic facies and no pitfall risk
-        grades[7:11] = 'D' # best data quality and rock physics
-        grades[15] = 'D' # avo method = best
-    return grades
-
 
 def initialize_dhimatrix():
     # INITIALIZE DATAFRAME
@@ -293,7 +271,7 @@ def update_dhi_matrix(dhimatrix, grades):
 
     pitfall_index = np.mean([pitfall_1_index, pitfall_2_index])
 
-    return dm, primary_dhi_index, extended_dhi_index, pitfall_1_index, pitfall_2_index, pitfall_index
+    return dm, primary_dhi_index, pitfall_1_index, pitfall_2_index, pitfall_index
 
 def update_pos(pos_input, primary_dhi_index, pitfall_index, fancy=True):
 
